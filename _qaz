@@ -1,0 +1,397 @@
+#compdef _qaz qaz
+
+function _stacks {
+  # warning: this operates on the default config.yml and does not consider a previously given config file using the -c|--config option
+  local -a stacks
+  stacks=( $(echo "ls" | qaz shell | awk 'NR>5{flag=1}/EOF/{flag=0}flag' | sort) )
+  _describe 'stack'  stacks
+}
+
+function _profiles {
+  local -a profiles
+  profiles=( $( cat ~/.aws/credentials 2>/dev/null | sed -n "s/^\[\(.*\)\]$/\1/p" | sort) )
+  _describe 'profile' profiles
+}
+
+function _qaz {
+  local -a commands
+
+  _arguments -C \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '--version[print current/running version]' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "change:Change-Set management for AWS Stacks"
+      "check:Validates Cloudformation Templates"
+      "completion:Output shell completion code for the specified shell (bash or zsh)"
+      "deploy:Deploys stack(s) to AWS"
+      "exports:Prints stack exports"
+      "generate:Generates template from configuration values"
+      "git-deploy:Deploy project from Git repository"
+      "git-status:Check status of deployment via files stored in Git repository"
+      "help:Help about any command"
+      "init:Creates an initial Qaz config file"
+      "invoke:Invoke AWS Lambda Functions"
+      "outputs:Prints stack outputs"
+      "protect:Enables stack termination protection"
+      "set-policy:Set Stack Policies based on configured value"
+      "shell:Qaz interactive shell - loads the specified config into an interactive shell"
+      "status:Prints status of deployed/un-deployed stacks"
+      "terminate:Terminates stacks"
+      "update:Updates a given stack"
+      "values:Print stack values from config in YAML format"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  change)
+    _qaz_change
+    ;;
+  check)
+    _qaz_check
+    ;;
+  completion)
+    _qaz_completion
+    ;;
+  deploy)
+    _qaz_deploy
+    ;;
+  exports)
+    _qaz_exports
+    ;;
+  generate)
+    _qaz_generate
+    ;;
+  git-deploy)
+    _qaz_git-deploy
+    ;;
+  git-status)
+    _qaz_git-status
+    ;;
+  help)
+    _qaz_help
+    ;;
+  init)
+    _qaz_init
+    ;;
+  invoke)
+    _qaz_invoke
+    ;;
+  outputs)
+    _qaz_outputs
+    ;;
+  protect)
+    _qaz_protect
+    ;;
+  set-policy)
+    _qaz_set-policy
+    ;;
+  shell)
+    _qaz_shell
+    ;;
+  status)
+    _qaz_status
+    ;;
+  terminate)
+    _qaz_terminate
+    ;;
+  update)
+    _qaz_update
+    ;;
+  values)
+    _qaz_values
+    ;;
+  esac
+}
+
+
+function _qaz_change {
+  local -a commands
+
+  _arguments -C \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    "1: :->cmnds" \
+    "*::arg:->args"
+
+  case $state in
+  cmnds)
+    commands=(
+      "create:Create Changet-Set"
+      "desc:Describe Change-Set"
+      "execute:Execute Change-Set"
+      "list:List Change-Sets"
+      "rm:Delete Change-Set"
+    )
+    _describe "command" commands
+    ;;
+  esac
+
+  case "$words[1]" in
+  create)
+    _qaz_change_create
+    ;;
+  desc)
+    _qaz_change_desc
+    ;;
+  execute)
+    _qaz_change_execute
+    ;;
+  list)
+    _qaz_change_list
+    ;;
+  rm)
+    _qaz_change_rm
+    ;;
+  esac
+}
+
+function _qaz_change_create {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file (Required)]:filename:_files' \
+    '(-s --stack)'{-s,--stack}'[Qaz local project Stack Name (Required)]:stack:_stacks' \
+    '(-t --template)'{-t,--template}'[path to template file Or stack::url]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_change_desc {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file (Required)]:filename:_files' \
+    '(-s --stack)'{-s,--stack}'[Qaz local project Stack Name (Required)]:stack:_stacks' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_change_execute {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file (Required)]:filename:_files' \
+    '(-s --stack)'{-s,--stack}'[Qaz local project Stack Name (Required)]:stack:_stacks' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_change_list {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file (Required)]:filename:_files' \
+    '(-s --stack)'{-s,--stack}'[Qaz local project Stack Name (Required)]:stack:_stacks' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_change_rm {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file (Required)]:filename:_files' \
+    '(-s --stack)'{-s,--stack}'[Qaz local project Stack Name (Required)]:stack:_stacks' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_check {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '(-t --template)'{-t,--template}'[path to template source Or stack::source]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_completion {
+  _arguments \
+    '(-h --help)'{-h,--help}'[help for completion]' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_deploy {
+  _arguments \
+    '(-A --all)'{-A,--all}'[deploy all stacks with defined Sources in config]' \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--disable-rollback[Set Stack to rollback on deployment failures]' \
+    '(*-t *--template)'{\*-t,\*--template}'[path to template file(s) Or stack::url]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_exports {
+  _arguments \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_generate {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '(-t --template)'{-t,--template}'[path to template source Or stack::source]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_git-deploy {
+  _arguments \
+    '(-A --all)'{-A,--all}'[deploy all stacks with defined Sources in config]' \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--disable-rollback[Set Stack to rollback on deployment failures]' \
+    '--password[git password]:' \
+    '--ssh-rsa[path to git SSH id_rsa]:' \
+    '(-u --user)'{-u,--user}'[git username]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_git-status {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--password[git password]:' \
+    '--ssh-rsa[path to git SSH id_rsa]:' \
+    '(-u --user)'{-u,--user}'[git username]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_help {
+  _arguments \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_init {
+  _arguments \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_invoke {
+  _arguments \
+    '(-x --async)'{-x,--async}'[invoke lambda function asynchronously ]' \
+    '(-e --event)'{-e,--event}'[JSON Event data for AWS Lambda invoke]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_outputs {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_protect {
+  _arguments \
+    '(-A --all)'{-A,--all}'[protect all stacks]' \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--off[set termination protection to off]' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_set-policy {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_shell {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_status {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:'
+}
+
+function _qaz_terminate {
+  _arguments \
+    '(-A --all)'{-A,--all}'[terminate all stacks]' \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '*::stack:_stacks'
+}
+
+function _qaz_update {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '(-t --template)'{-t,--template}'[path to template source Or stack::source]:' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
+function _qaz_values {
+  _arguments \
+    '(-c --config)'{-c,--config}'[path to config file]:filename:_files' \
+    '--debug[Run in debug mode...]' \
+    '--no-colors[disable colors in outputs]' \
+    '(-p --profile)'{-p,--profile}'[configured aws profile]:profile:_profiles' \
+    '(-r --region)'{-r,--region}'[configured aws region: if blank, the region is acquired via the profile]:' \
+    '1::stack:_stacks'
+}
+
